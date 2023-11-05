@@ -9,6 +9,12 @@ import static com.example.antlr.ParseProcessor.step3;
 @RestController
 @RequestMapping("/antlr")
 public class AntlrController {
+
+    @GetMapping("/test")
+    public String test() {
+        return "success";
+    }
+
     @PostMapping("/run")
     public SqlComponent[] runSQL(@RequestParam String sql) {
         SqlComponent[] component = step3(sql);
