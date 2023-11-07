@@ -4,6 +4,9 @@ package com.example.antlrapi.controller;
 import com.example.antlrapi.dto.SqlComponent;
 import org.json.JSONObject;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+
 import static com.example.antlr.ParseProcessor.step3;
 
 @RestController
@@ -16,9 +19,9 @@ public class AntlrController {
     }
 
     @PostMapping("/run")
-    public SqlComponent[] runSQL(@RequestParam String sql) {
-        SqlComponent[] component = step3(sql);
-        return component;
+    public ArrayList<SqlComponent> runSQL(@RequestParam String sql) {
+        ArrayList<SqlComponent> components = step3(sql);
+        return components;
     }
 
 }

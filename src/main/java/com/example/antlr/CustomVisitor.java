@@ -2,6 +2,7 @@ package com.example.antlr;
 
 import com.example.antlr.gen.MySqlParser;
 import com.example.antlr.gen.MySqlParserBaseVisitor;
+import org.antlr.v4.runtime.RuleContext;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,22 +28,31 @@ public class CustomVisitor extends MySqlParserBaseVisitor { // 3단계 visitor
 //        keyValue.put("table", tablename);
 //
 //        return keyValue;
+
 //    }
 
     @Override
-    public Map<String, String> visitQuerySpecification(MySqlParser.QuerySpecificationContext ctx){
-        Map<String, String> keyValue = new HashMap<>();
+    public RuleContext visitQuerySpecification(MySqlParser.QuerySpecificationContext ctx) {
+        System.out.println("ENTER QUERY SPECIFICATION");
+        System.out.println("columns : " + ctx.selectElements().selectElement(0).getText());
 
-        String keyword = ctx.SELECT().getText();
-        String colname = ctx.selectElements().selectElement(0).getText();
-        String tablename = ctx.fromClause().tableSources().tableSource(0).getText();
+        return (RuleContext) visitChildren(ctx);
 
-        keyValue.put("keyword", keyword);
-        keyValue.put("column", colname);
-        keyValue.put("table", tablename);
-
-        return keyValue;
     }
+//    @Override
+//    public Map<String, String> visitQuerySpecification(MySqlParser.QuerySpecificationContext ctx){
+//        Map<String, String> keyValue = new HashMap<>();
+//
+//        String keyword = ctx.SELECT().getText();
+//        String colname = ctx.selectElements().selectElement(0).getText();
+//        String tablename = ctx.fromClause().tableSources().tableSource(0).getText();
+//
+//        keyValue.put("keyword", keyword);
+//        keyValue.put("column", colname);
+//        keyValue.put("table", tablename);
+//
+//        return keyValue;
+//    }
 
     public int getPlusCount() {
         return plusCount;
