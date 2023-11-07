@@ -6,18 +6,22 @@ import com.example.antlrapi.dto.SqlComponent;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import com.example.antlr.gen.MySqlLexer;
 import com.example.antlr.gen.MySqlParser;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 public class ParseProcessor {
 
     public static ParseTreeWalker walker = new ParseTreeWalker();
     public static MySqlParser.RootContext tree;
+    public static MySqlParser.QuerySpecificationContext queryTree;
 
     public static JSONObject[] component = null;
-    public static SqlComponent[] sqlComponent;
+    public static ArrayList<SqlComponent> sqlComponents = new ArrayList<>();
 
     public static void step1(){
         // 1. 쿼리가 몇 개 인지 파악
@@ -63,21 +67,34 @@ public class ParseProcessor {
         }
     }
 
-    public static SqlComponent[] step3(String sqlQuery){
-        // 3. 쿼리의 구성 요소 key value 형식으로 뽑아내기
-        CharStream charStream2 = CharStreams.fromString(sqlQuery);
-        MySqlLexer mySqlLexer2 = new MySqlLexer(charStream2);
-        CommonTokenStream commonTokenStream2 = new CommonTokenStream(mySqlLexer2);
-        MySqlParser mySqlParser2 = new MySqlParser(commonTokenStream2);
 
-        ComponentListener listener2 = new ComponentListener();
+    public static ArrayList<SqlComponent> step3(String sqlQuery){
 
-        tree = mySqlParser2.root();
-        walker.walk(listener2, tree);
+        // 파싱 준비 과정
+        CharStream charStream = CharStreams.fromString(sqlQuery);
+        MySqlLexer mySqlLexer = new MySqlLexer(charStream);
+        CommonTokenStream commonTokenStream = new CommonTokenStream(mySqlLexer);
+        MySqlParser mySqlParser = new MySqlParser(commonTokenStream);
 
-        sqlComponent = listener2.returnComponents();
+        tree = mySqlParser.root();
+//
+//        queryTree = mySqlParser.querySpecification();
+//        String str = queryTree.getText();
+//        System.out.println(str);
 
-        return sqlComponent;
+
+        // 커스텀 리스너 생성
+        ComponentListener listener = new ComponentListener();
+
+        // 커스텀한 리스너를 통해 tree를 root부터 순회
+        walker.walk(listener, tree);
+//        walker.walk(listener, queryTree.getParent());
+
+        ArrayList<SqlComponent> sqlComponents = listener.returnComponents();
+
+
+        return sqlComponents;
+
 
     }
 }
