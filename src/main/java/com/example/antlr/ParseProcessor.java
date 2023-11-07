@@ -65,8 +65,6 @@ public class ParseProcessor {
 
     public static SqlComponent[] step3(String sqlQuery){
         // 3. 쿼리의 구성 요소 key value 형식으로 뽑아내기
-        System.out.println("\n<<step 3>>");
-
         CharStream charStream2 = CharStreams.fromString(sqlQuery);
         MySqlLexer mySqlLexer2 = new MySqlLexer(charStream2);
         CommonTokenStream commonTokenStream2 = new CommonTokenStream(mySqlLexer2);
