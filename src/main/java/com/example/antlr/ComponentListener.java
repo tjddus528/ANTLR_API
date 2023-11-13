@@ -20,9 +20,10 @@ public class ComponentListener extends MySqlParserBaseListener {
 
     public void analyzeQuery(MySqlParser.QuerySpecificationContext ctx){
         String keyword = "";
+        String sql = "";
         ArrayList<String> columns = new ArrayList<>();
         ArrayList<String> tables = new ArrayList<>();
-        Condition condition = new Condition();;
+        Condition condition = new Condition();
 
         keyword = ctx.SELECT().getText();
 
@@ -58,7 +59,7 @@ public class ComponentListener extends MySqlParserBaseListener {
             }
         }
 
-        resultSqlComponets.add(new SqlComponent(1, keyword, columns, tables, condition));
+        resultSqlComponets.add(new SqlComponent(1, keyword, sql, columns, tables, condition));
 
 
     }

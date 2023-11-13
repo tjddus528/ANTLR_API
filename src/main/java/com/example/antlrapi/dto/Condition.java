@@ -13,7 +13,7 @@ public class Condition {
 
     // ex) where account_number = "A-215" -> type : "where", subject : account_number, "operator" : "=", "object: "A-215"
     // ex) where customer_name = (SELECT ~ ) -> type : "where", subject : "customer_name" , operator : "=" , "object" : [subquery]
-    String type;
+    String type ;
     String subject;
     String operator;
     String object;
