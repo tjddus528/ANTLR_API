@@ -3,9 +3,6 @@ package com.example.antlr;
 import com.example.antlr.gen.MySqlParser;
 import com.example.antlr.gen.MySqlParserBaseListener;
 import com.example.antlrapi.dto.SqlComponent;
-import org.antlr.v4.runtime.tree.TerminalNode;
-
-import java.util.ArrayList;
 
 public class ExtractComponentListener extends MySqlParserBaseListener {
 
