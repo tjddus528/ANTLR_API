@@ -20,9 +20,12 @@ public class AntlrApiApplication {
 //        ArrayList<SqlComponent> components = new ArrayList<>();
 
 
-        String sql = "(SELECT branch_name, customer_name FROM depositor, account WHERE depositor.account_number = account.account_number) UNION (SELECT branch_name, customer_name FROM borrower, loan WHERE borrower.loan_number = loan.loan_number);";
+//        String sql = "SELECT a.name FROM t_person WHERE a.person in (SELECT b.person FROM grade WHERE grade = 'a');";
+//
+//        testApi(sql);
 
-        pullSubquery(sql);
+
+        //pullSubquery(sql);
 
 //        int queryCount = step1(sql);
 //        System.out.println(queryCount);

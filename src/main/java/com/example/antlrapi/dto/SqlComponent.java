@@ -35,4 +35,14 @@ public class SqlComponent {
         this.tables = null;
         this.condition = null;
     }
+
+    // extractComponents 함수에서 임시 사용
+    public SqlComponent(String keyword, ArrayList<String> columns, ArrayList<String> tables){
+        this.step = 0;
+        this.keyword = keyword;
+        this.sql = null;
+        this.columns = columns;
+        this.tables = tables;
+        this.condition = null;
+    }
 }

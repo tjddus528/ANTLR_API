@@ -31,14 +31,18 @@ public class AntlrController {
         if (queryCnt != 0 && queryCnt != 1) {  // 복잡한 쿼리문 (queryCnt != 0 : insert update delete create ..  /  queryCnt != 1 : 단일 select)
             ArrayList<String> subquery = pullSubquery(sql);
             int subquerySize = subquery.size();
-            for(int i = 0; i<subquerySize; i++){
+            for(int i = 0; i < subquerySize; i++){
 
                 // step2함수는 SqlComponents 요소들 채워주는 용도
                 SqlComponent sqlcmpt = step2(subquery.get(i));
+                sqlcmpt.setStep(i+1);
+                sqlcmpt.setSql(subquery.get(i));
                 components.add(i, sqlcmpt);
             }
             // 전체 쿼리 넣어주기
             SqlComponent originalQuery = step2(sql);
+            originalQuery.setStep(subquerySize+1);
+            originalQuery.setSql(sql);
             components.add(subquerySize, originalQuery);
         }
         else {   // 단순한 쿼리문 일 경우
