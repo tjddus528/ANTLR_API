@@ -76,6 +76,8 @@ public class ParseProcessor {
         CommonTokenStream commonTokenStream1 = new CommonTokenStream(mySqlLexer1);
         MySqlParser mySqlParser1 = new MySqlParser(commonTokenStream1);
 
+        tree = mySqlParser1.root(); // ** !!
+
         ExtractComponentListener listener2 = new ExtractComponentListener();
         walker.walk(listener2, tree);  // tree는 1단계에서 사용한 tree를 사용해도 됨(새로 만들면 오류 남 ;; 왜 그런건지는 모르겠음 ;;), listener는 새로 만들기
 

@@ -29,12 +29,20 @@ public class AntlrController {
         int queryCnt = step1(sql);
 
         if (queryCnt != 0 && queryCnt != 1) {  // 복잡한 쿼리문 (queryCnt != 0 : insert update delete create ..  /  queryCnt != 1 : 단일 select)
+
+            // 쿼리가 늘어나는 상황에 일반화 해서 짠다고 짰는데,
+            // 서브쿼리가 2개인 경우 (ex. Select ~ Union Select ~) 에는 전체 쿼리가 Select 문이 아니라
+            // 다른 처리 방식 필요함
+
+            // 서브쿼리 1개(총 쿼리가 2개인 경우)
             ArrayList<String> subquery = pullSubquery(sql);
             int subquerySize = subquery.size();
             for(int i = 0; i < subquerySize; i++){
 
                 // step2함수는 SqlComponents 요소들 채워주는 용도
+                System.out.println("subquery Check ! : " + subquery.get(i));
                 SqlComponent sqlcmpt = step2(subquery.get(i));
+
                 sqlcmpt.setStep(i+1);
                 sqlcmpt.setSql(subquery.get(i));
                 components.add(i, sqlcmpt);
@@ -44,6 +52,10 @@ public class AntlrController {
             originalQuery.setStep(subquerySize+1);
             originalQuery.setSql(sql);
             components.add(subquerySize, originalQuery);
+
+            for(int i=0;i<components.size();i++){
+                System.out.println(components.get(i).getSql());
+            }
         }
         else {   // 단순한 쿼리문 일 경우
             String keyword = getCommand(sql);

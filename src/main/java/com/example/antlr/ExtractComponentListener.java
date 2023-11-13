@@ -19,7 +19,7 @@ public class ExtractComponentListener extends MySqlParserBaseListener {
         keyword = ctx.SELECT().getText();
 
         int columnCnt = ctx.selectElements().getChildCount();
-        for(int i=0;i<columnCnt;i++) {
+        for(int i=0; i < columnCnt; i++) {
             int index = 0;
             String str = ctx.selectElements().getChild(i).getText();
             if(str.equals(",")) continue;
@@ -29,7 +29,7 @@ public class ExtractComponentListener extends MySqlParserBaseListener {
         }
 
         int tableCnt = ctx.fromClause().tableSources().getChildCount();
-        for(int i=0;i<tableCnt;i++) {
+        for(int i = 0; i < tableCnt; i++) {
             int index = 0;
             String str = ctx.fromClause().tableSources().getChild(i).getText();
             if(str.equals(",")) continue;
@@ -48,7 +48,6 @@ public class ExtractComponentListener extends MySqlParserBaseListener {
             extractComponent(ctx);
             flag = 1;
         }
-//        extractComponent(ctx);
     }
 
     public SqlComponent returnComponent(){
