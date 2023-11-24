@@ -2,12 +2,17 @@ package com.example.antlrapi.controller;
 
 
 import com.example.antlrapi.dto.SqlComponent;
+import com.example.antlrapi.dto.StepSqlComponent;
 import org.json.JSONObject;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.HtmlUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import static com.example.antlr.ParseProcessor.*;
+import static com.example.antlr.ParseProcessor2.divideSqlIntoStep;
 
 @RestController
 @RequestMapping("/antlr")
@@ -18,6 +23,12 @@ public class AntlrController {
     public String test() {
         return "success";
     }
+
+    @PostMapping("/runByStep")
+    public ArrayList<StepSqlComponent> runSqlIntoStep(@RequestParam String sql) throws UnsupportedEncodingException {
+        return divideSqlIntoStep(sql);
+    }
+
 
     @PostMapping("/run")
     public ArrayList<SqlComponent> runSQL(@RequestParam String sql) {
