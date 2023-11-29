@@ -1046,7 +1046,7 @@ public class SqlStepVisitor extends MySqlParserBaseVisitor {
         StepSqlComponent stepSqlComponent = new StepSqlComponent();
         ArrayList<ColumnInfo> conditionColumns = new ArrayList<>();
 
-        System.out.println(predicateExpressionContext.getChild(0).getClass());
+//        System.out.println(predicateExpressionContext.getChild(0).getClass());
 
         // 1. BinaryComparisonPredicate (A 연산자 B)
         if (predicateExpressionContext.getChild(0) instanceof MySqlParser.BinaryComparisonPredicateContext) {
@@ -1263,6 +1263,10 @@ public class SqlStepVisitor extends MySqlParserBaseVisitor {
         // 테이블명
         if(cnt == 1) {
             tableInfo.setTableName(ctx.getChild(0).getText());
+        }
+        else if(cnt == 2) {
+            tableInfo.setTableName(ctx.getChild(0).getText());
+            tableInfo.setAlias(ctx.getChild(1).getText());
         }
         // 테이블명 AS alias
         else {
@@ -1554,10 +1558,10 @@ public class SqlStepVisitor extends MySqlParserBaseVisitor {
         selectStatement += selectKeyword + " ";
         stepSqlComponent.setKeyword("SELECT");
         if(ctx.selectSpec().size() != 0) {
-            System.out.println("selectSpec");
+//            System.out.println("selectSpec");
 
             for(int i=0; i<ctx.selectSpec().size(); i++) {
-                System.out.println(ctx.selectSpec().get(i).getText());
+//                System.out.println(ctx.selectSpec().get(i).getText());
                 selectStatement += " " + ctx.selectSpec().get(i).getText() + " ";
             }
         }
@@ -1567,8 +1571,8 @@ public class SqlStepVisitor extends MySqlParserBaseVisitor {
             int columnCnt = ctx.selectElements().getChildCount();
 //        System.out.println("columnCnt : " + columnCnt);
             for(int i=0; i < columnCnt; i++) {
-                System.out.println(ctx.selectElements().getChild(i).getClass());
-                System.out.println(ctx.selectElements().getChild(i).getText());
+//                System.out.println(ctx.selectElements().getChild(i).getClass());
+//                System.out.println(ctx.selectElements().getChild(i).getText());
                 String str = ctx.selectElements().getChild(i).getText();
                 // selectElement요소에서
                 // 서브쿼리 만났을 때!!!
@@ -1580,12 +1584,12 @@ public class SqlStepVisitor extends MySqlParserBaseVisitor {
                     // 2 : AS -> TerminalNodeImple
                     // 3 : alias -> uid (터미널 아님)
                     int cnt1 = selectExpressionContext.getChildCount();
-                    System.out.println("cnt 1 : " + cnt1);
+//                    System.out.println("cnt 1 : " + cnt1);
 
                     for(int j=0; j< cnt1 ; j++) {
-                        System.out.println();
-                        System.out.println(selectExpressionContext.getChild(j).getClass());
-                        System.out.println();
+//                        System.out.println();
+//                        System.out.println(selectExpressionContext.getChild(j).getClass());
+//                        System.out.println();
                         ColumnInfo columnInfo = new ColumnInfo();
                         // 서브 쿼리
                         if (selectExpressionContext.getChild(j) instanceof MySqlParser.PredicateExpressionContext) {
@@ -1606,7 +1610,7 @@ public class SqlStepVisitor extends MySqlParserBaseVisitor {
                             columnInfo.setAlias(selectExpressionContext.getChild(j).getText());
                         }
                         else {
-                            System.out.println("else");
+//                            System.out.println("else");
                             selectStatement += " " + selectExpressionContext.getChild(j).getText() + " ";
                             columnInfo.setColumnLabel(selectExpressionContext.getChild(j).getText());
                         }
