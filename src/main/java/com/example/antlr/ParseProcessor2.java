@@ -35,9 +35,9 @@ public class ParseProcessor2 {
         walker.walk(listener, tree);
 
         ArrayList<String> sqlList = listener.sqlStepVisitor.sqlList;
-        for (String s : sqlList) {
-            System.out.println(s);
-        }
+//        for (String s : sqlList) {
+//            System.out.println(s);
+//        }
 
         ArrayList<StepSqlComponent> stepSqlComponentsListResult = listener.sqlStepVisitor.stepSqlComponentsList;
         return stepSqlComponentsListResult;
