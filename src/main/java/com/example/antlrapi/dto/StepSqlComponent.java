@@ -14,6 +14,7 @@ public class StepSqlComponent {
     String keyword;
     String sqlStatement;
     ArrayList<TableInfo> tables;
+    ArrayList<SchemaDTO> tableDataList;
     ArrayList<ColumnInfo> selectedColumns;
     ArrayList<ColumnInfo> conditionColumns;
     ArrayList<String> conditions;
@@ -30,6 +31,7 @@ public class StepSqlComponent {
         keyword = null;
         sqlStatement = null;
         tables = null;
+        tableDataList = null;
         selectedColumns = null;
         conditionColumns = null;
         conditions = null;
@@ -46,6 +48,7 @@ public class StepSqlComponent {
         this.keyword = keyword;
         this.sqlStatement = sqlStatement;
         this.tables = null;
+        this.tableDataList = null;
         this.selectedColumns = null;
         this.conditionColumns = null;
         this.conditions = null;
