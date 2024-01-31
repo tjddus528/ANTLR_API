@@ -627,28 +627,6 @@ public class SqlStepVisitor extends MySqlParserBaseVisitor {
         stepSqlComponent.setQueryB(queryB);
         stepSqlComponentsList.add(stepSqlComponent);
     }
-
-
-    @Override public RuleContext visitSelectExpressionElement(MySqlParser.SelectExpressionElementContext ctx) {
-//        System.out.println("visitSelectExpressionElement");
-//        System.out.println(ctx.getText());
-
-        int cnt = ctx.getChildCount();
-//        System.out.println(cnt);
-        for(int i=0; i<cnt; i++) {
-            if(!(ctx.getChild(i) instanceof TerminalNode)) {
-                RuleContext queryContext = (RuleContext) ctx.getChild(i);
-                if (queryContext instanceof MySqlParser.QuerySpecificationContext) {
-//                    System.out.println("QuerySpecific!!!");
-                    return queryContext;
-                } else {
-//                visitChildren(ctx);
-                }
-            }
-        }
-        return null;
-    }
-
     public Object searchQuerySpecific(RuleContext node) {
 //        System.out.println("searchQuerySpecific");
 
@@ -675,6 +653,7 @@ public class SqlStepVisitor extends MySqlParserBaseVisitor {
         return result;
     }
 
+    // from 관련
     public ColumnInfo visitFullColumnName(MySqlParser.FullColumnNameContext fullColumnName) {
         ColumnInfo columnInfo = new ColumnInfo();
 //        System.out.println("FullColumnNameContext");
@@ -703,7 +682,6 @@ public class SqlStepVisitor extends MySqlParserBaseVisitor {
         }
         return columnInfo;
     }
-
     public ColumnInfo visitSelectColumnElement(MySqlParser.SelectColumnElementContext selectColumnElementContext) {
         String selectStatement = "";
         ColumnInfo columnInfo = new ColumnInfo();
@@ -764,7 +742,66 @@ public class SqlStepVisitor extends MySqlParserBaseVisitor {
         }
         return columnInfo;
     }
-    // where 절
+    public StepSqlComponent visitSubqueryTableItem(MySqlParser.SubqueryTableItemContext subqueryTableItemContext) {
+        int cntOfChildSubqueryTable = subqueryTableItemContext.getChildCount();
+        String tableStatement = "";
+        StepSqlComponent stepSqlComponent = new StepSqlComponent();
+        ArrayList<TableInfo> usedTables = new ArrayList<>();
+        TableInfo tableInfo = new TableInfo();
+
+        for(int i=0; i<cntOfChildSubqueryTable; i++) {
+
+            // (서브쿼리)
+            if (subqueryTableItemContext.getChild(i) instanceof MySqlParser.ParenthesisSelectContext) {
+                StepSqlComponent tableResult = visitParenthesisSelectContext((MySqlParser.ParenthesisSelectContext) subqueryTableItemContext.getChild(i));
+//                System.out.println("visitSubqueryTableItem > ParenthesisSelectContext");
+
+                tableStatement += "(" + tableResult.getSqlStatement() + ")";
+                tableInfo.setTableName(tableResult.getSqlStatement());
+
+            }
+            // AS
+            else if(subqueryTableItemContext.getChild(i) instanceof TerminalNodeImpl) {
+                tableStatement += " " + subqueryTableItemContext.getChild(i).getText();
+            }
+            // alias
+            else if (subqueryTableItemContext.getChild(i) instanceof MySqlParser.UidContext) {
+                tableStatement += " " + subqueryTableItemContext.getChild(i).getText();
+                tableInfo.setAlias(subqueryTableItemContext.getChild(i).getText());
+            }
+            else {
+                tableStatement += " " + subqueryTableItemContext.getChild(i).getText();
+            }
+        }
+
+        stepSqlComponent.setSqlStatement(tableStatement);
+        usedTables.add(tableInfo);
+        stepSqlComponent.setTables(usedTables);
+        return stepSqlComponent;
+    }
+
+    public TableInfo visitAtomTableItem(MySqlParser.AtomTableItemContext ctx) {
+        TableInfo tableInfo = new TableInfo();
+        int cnt = ctx.getChildCount();
+
+        // 테이블명
+        if(cnt == 1) {
+            tableInfo.setTableName(ctx.getChild(0).getText());
+        }
+        else if(cnt == 2) {
+            tableInfo.setTableName(ctx.getChild(0).getText());
+            tableInfo.setAlias(ctx.getChild(1).getText());
+        }
+        // 테이블명 AS alias
+        else {
+            tableInfo.setTableName(ctx.getChild(0).getText());
+            tableInfo.setAlias(ctx.getChild(2).getText());
+        }
+        return tableInfo;
+    }
+
+
+    // expression 관련
     public StepSqlComponent visitSimpleSelectContext(MySqlParser.SimpleSelectContext ctx) {
         String conditionStatement = "";
         StepSqlComponent stepSqlComponent = new StepSqlComponent();
@@ -783,6 +820,25 @@ public class SqlStepVisitor extends MySqlParserBaseVisitor {
 
         stepSqlComponent.setSqlStatement(conditionStatement);
         return stepSqlComponent;
+    }
+    @Override public RuleContext visitSelectExpressionElement(MySqlParser.SelectExpressionElementContext ctx) {
+//        System.out.println("visitSelectExpressionElement");
+//        System.out.println(ctx.getText());
+
+        int cnt = ctx.getChildCount();
+//        System.out.println(cnt);
+        for(int i=0; i<cnt; i++) {
+            if(!(ctx.getChild(i) instanceof TerminalNode)) {
+                RuleContext queryContext = (RuleContext) ctx.getChild(i);
+                if (queryContext instanceof MySqlParser.QuerySpecificationContext) {
+//                    System.out.println("QuerySpecific!!!");
+                    return queryContext;
+                } else {
+//                visitChildren(ctx);
+                }
+            }
+        }
+        return null;
     }
     @Override
     public StepSqlComponent visitSubqueryExpressionAtom(MySqlParser.SubqueryExpressionAtomContext ctx) {
@@ -856,84 +912,6 @@ public class SqlStepVisitor extends MySqlParserBaseVisitor {
         stepSqlComponent.setConditionColumns(conditionColumns);
         return stepSqlComponent;
     }
-    public StepSqlComponent visitExpressionAtomPredicate(MySqlParser.ExpressionAtomPredicateContext expressionAtomPredicateContext) {
-//        System.out.println("visitExpressionAtomPredicate -> " + expressionAtomPredicateContext.getText());
-
-        String conditionStatement = "";
-        StepSqlComponent stepSqlComponent = new StepSqlComponent();
-        ArrayList<ColumnInfo> conditionColumns = new ArrayList<>();
-
-        int childOfExpressionAtom = expressionAtomPredicateContext.getChildCount();
-//        System.out.println("childOfExpressionAtom : " + childOfExpressionAtom);
-        for (int i = 0; i < childOfExpressionAtom; i++) {
-//            System.out.println(expressionAtomPredicateContext.getChild(i).getClass());
-            if(expressionAtomPredicateContext.getChild(i) instanceof MySqlParser.SimpleSelectContext) {
-                StepSqlComponent conditionResult = visitSimpleSelectContext((MySqlParser.SimpleSelectContext) expressionAtomPredicateContext.getChild(i));
-                conditionStatement += conditionResult.getSqlStatement();
-                if(conditionResult.getConditionColumns()!=null) {
-                    for (int j = 0; j < conditionResult.getConditionColumns().size(); j++) {
-                        conditionColumns.add(conditionResult.getConditionColumns().get(j));
-                    }
-                }
-
-            }
-            else if (expressionAtomPredicateContext.getChild(i) instanceof MySqlParser.ExpressionAtomPredicateContext) {
-                StepSqlComponent conditionResult = visitExpressionAtomPredicate((MySqlParser.ExpressionAtomPredicateContext) expressionAtomPredicateContext.getChild(i));
-                conditionStatement += conditionResult.getSqlStatement();
-                if(conditionResult.getConditionColumns()!=null) {
-                    for (int j = 0; j < conditionResult.getConditionColumns().size(); j++) {
-                        conditionColumns.add(conditionResult.getConditionColumns().get(j));
-                    }
-                }
-            }
-            else if (expressionAtomPredicateContext.getChild(i) instanceof MySqlParser.ExistsExpressionAtomContext) {
-                StepSqlComponent conditionResult = visitExistsExpressionAtom((MySqlParser.ExistsExpressionAtomContext) expressionAtomPredicateContext.getChild(i));
-                conditionStatement += conditionResult.getSqlStatement();
-                if(conditionResult.getConditionColumns()!=null) {
-                    for (int j = 0; j < conditionResult.getConditionColumns().size(); j++) {
-                        conditionColumns.add(conditionResult.getConditionColumns().get(j));
-                    }
-                }
-            }
-            else if (expressionAtomPredicateContext.getChild(i) instanceof MySqlParser.SubqueryExpressionAtomContext) {
-                StepSqlComponent conditionResult = visitSubqueryExpressionAtom((MySqlParser.SubqueryExpressionAtomContext) expressionAtomPredicateContext.getChild(i));
-                conditionStatement += conditionResult.getSqlStatement();
-                if(conditionResult.getConditionColumns()!=null) {
-                    for (int j = 0; j < conditionResult.getConditionColumns().size(); j++) {
-                        conditionColumns.add(conditionResult.getConditionColumns().get(j));
-                    }
-                }
-            }
-            else if (expressionAtomPredicateContext.getChild(i) instanceof MySqlParser.FullColumnNameExpressionAtomContext) {
-//                System.out.println("FullColumnNameExpressionAtomContext");
-                conditionStatement += expressionAtomPredicateContext.getChild(i).getText();
-
-
-                ColumnInfo columnInfo = visitFullColumnNameExpressionContext((MySqlParser.FullColumnNameExpressionAtomContext) expressionAtomPredicateContext.getChild(i));
-//                System.out.println("WHERE 컴포넌트 > column info ");
-//                System.out.println("columnInfo");
-//                System.out.println("getTableName : "+columnInfo.getTableName());
-//                System.out.println("getColumnLabel : "+columnInfo.getColumnLabel());
-                conditionColumns.add(columnInfo);
-            }
-            // terminal node
-            else {
-//                System.out.println("expressionAtom > simpleSelect 이외에");
-                String str = expressionAtomPredicateContext.getChild(i).getText();
-                if(str.equals("(")) conditionStatement += str + " ";
-                else if(str.equals(")")) conditionStatement += " " + str;
-                else conditionStatement += " " + str + " ";
-            }
-        }
-//        System.out.println("conditionStatement -> " + conditionStatement);
-        stepSqlComponent.setSqlStatement(conditionStatement);
-        stepSqlComponent.setConditionColumns(conditionColumns);
-
-        return stepSqlComponent;
-
-    }
-
-
     public StepSqlComponent visitBinaryComparisonPredicate(MySqlParser.BinaryComparisonPredicateContext binaryComparisonPredicateContext) {
 //        System.out.println("visitBinaryComparisonPredicate -> " + binaryComparisonPredicateContext.getText());
 
@@ -1039,6 +1017,82 @@ public class SqlStepVisitor extends MySqlParserBaseVisitor {
         stepSqlComponent.setSqlStatement(conditionStatement);
         stepSqlComponent.setConditionColumns(conditionColumns);
         return stepSqlComponent;
+    }
+    public StepSqlComponent visitExpressionAtomPredicate(MySqlParser.ExpressionAtomPredicateContext expressionAtomPredicateContext) {
+//        System.out.println("visitExpressionAtomPredicate -> " + expressionAtomPredicateContext.getText());
+
+        String conditionStatement = "";
+        StepSqlComponent stepSqlComponent = new StepSqlComponent();
+        ArrayList<ColumnInfo> conditionColumns = new ArrayList<>();
+
+        int childOfExpressionAtom = expressionAtomPredicateContext.getChildCount();
+//        System.out.println("childOfExpressionAtom : " + childOfExpressionAtom);
+        for (int i = 0; i < childOfExpressionAtom; i++) {
+//            System.out.println(expressionAtomPredicateContext.getChild(i).getClass());
+            if(expressionAtomPredicateContext.getChild(i) instanceof MySqlParser.SimpleSelectContext) {
+                StepSqlComponent conditionResult = visitSimpleSelectContext((MySqlParser.SimpleSelectContext) expressionAtomPredicateContext.getChild(i));
+                conditionStatement += conditionResult.getSqlStatement();
+                if(conditionResult.getConditionColumns()!=null) {
+                    for (int j = 0; j < conditionResult.getConditionColumns().size(); j++) {
+                        conditionColumns.add(conditionResult.getConditionColumns().get(j));
+                    }
+                }
+
+            }
+            else if (expressionAtomPredicateContext.getChild(i) instanceof MySqlParser.ExpressionAtomPredicateContext) {
+                StepSqlComponent conditionResult = visitExpressionAtomPredicate((MySqlParser.ExpressionAtomPredicateContext) expressionAtomPredicateContext.getChild(i));
+                conditionStatement += conditionResult.getSqlStatement();
+                if(conditionResult.getConditionColumns()!=null) {
+                    for (int j = 0; j < conditionResult.getConditionColumns().size(); j++) {
+                        conditionColumns.add(conditionResult.getConditionColumns().get(j));
+                    }
+                }
+            }
+            else if (expressionAtomPredicateContext.getChild(i) instanceof MySqlParser.ExistsExpressionAtomContext) {
+                StepSqlComponent conditionResult = visitExistsExpressionAtom((MySqlParser.ExistsExpressionAtomContext) expressionAtomPredicateContext.getChild(i));
+                conditionStatement += conditionResult.getSqlStatement();
+                if(conditionResult.getConditionColumns()!=null) {
+                    for (int j = 0; j < conditionResult.getConditionColumns().size(); j++) {
+                        conditionColumns.add(conditionResult.getConditionColumns().get(j));
+                    }
+                }
+            }
+            else if (expressionAtomPredicateContext.getChild(i) instanceof MySqlParser.SubqueryExpressionAtomContext) {
+                StepSqlComponent conditionResult = visitSubqueryExpressionAtom((MySqlParser.SubqueryExpressionAtomContext) expressionAtomPredicateContext.getChild(i));
+                conditionStatement += conditionResult.getSqlStatement();
+                if(conditionResult.getConditionColumns()!=null) {
+                    for (int j = 0; j < conditionResult.getConditionColumns().size(); j++) {
+                        conditionColumns.add(conditionResult.getConditionColumns().get(j));
+                    }
+                }
+            }
+            else if (expressionAtomPredicateContext.getChild(i) instanceof MySqlParser.FullColumnNameExpressionAtomContext) {
+//                System.out.println("FullColumnNameExpressionAtomContext");
+                conditionStatement += expressionAtomPredicateContext.getChild(i).getText();
+
+
+                ColumnInfo columnInfo = visitFullColumnNameExpressionContext((MySqlParser.FullColumnNameExpressionAtomContext) expressionAtomPredicateContext.getChild(i));
+//                System.out.println("WHERE 컴포넌트 > column info ");
+//                System.out.println("columnInfo");
+//                System.out.println("getTableName : "+columnInfo.getTableName());
+//                System.out.println("getColumnLabel : "+columnInfo.getColumnLabel());
+                conditionColumns.add(columnInfo);
+            }
+            // terminal node
+            else {
+//                System.out.println("expressionAtom > simpleSelect 이외에");
+                String str = expressionAtomPredicateContext.getChild(i).getText();
+                if(str.equals("(")) conditionStatement += str + " ";
+                else if(str.equals(")")) conditionStatement += " " + str;
+                else conditionStatement += " " + str + " ";
+            }
+        }
+//        System.out.println("conditionStatement -> " + conditionStatement);
+        stepSqlComponent.setSqlStatement(conditionStatement);
+        stepSqlComponent.setConditionColumns(conditionColumns);
+
+        return stepSqlComponent;
+
     }
     public StepSqlComponent visitPredicateContext(MySqlParser.PredicateExpressionContext predicateExpressionContext) {
 //        System.out.println("PredicateExpressionContext : " + predicateExpressionContext.getText());
@@ -1167,45 +1221,6 @@ public class SqlStepVisitor extends MySqlParserBaseVisitor {
 //        System.out.println("--> conditionStatement -> " + conditionStatement);
         return stepSqlComponent;
     }
-    // from 절
-    public StepSqlComponent visitSubqueryTableItem(MySqlParser.SubqueryTableItemContext subqueryTableItemContext) {
-        int cntOfChildSubqueryTable = subqueryTableItemContext.getChildCount();
-        String tableStatement = "";
-        StepSqlComponent stepSqlComponent = new StepSqlComponent();
-        ArrayList<TableInfo> usedTables = new ArrayList<>();
-        TableInfo tableInfo = new TableInfo();
-
-        for(int i=0; i<cntOfChildSubqueryTable; i++) {
-
-            // (서브쿼리)
-            if (subqueryTableItemContext.getChild(i) instanceof MySqlParser.ParenthesisSelectContext) {
-                StepSqlComponent tableResult = visitParenthesisSelectContext((MySqlParser.ParenthesisSelectContext) subqueryTableItemContext.getChild(i));
-//                System.out.println("visitSubqueryTableItem > ParenthesisSelectContext");
-
-                tableStatement += "(" + tableResult.getSqlStatement() + ")";
-                tableInfo.setTableName(tableResult.getSqlStatement());
-
-            }
-            // AS
-            else if(subqueryTableItemContext.getChild(i) instanceof TerminalNodeImpl) {
-                tableStatement += " " + subqueryTableItemContext.getChild(i).getText();
-            }
-            // alias
-            else if (subqueryTableItemContext.getChild(i) instanceof MySqlParser.UidContext) {
-                tableStatement += " " + subqueryTableItemContext.getChild(i).getText();
-                tableInfo.setAlias(subqueryTableItemContext.getChild(i).getText());
-            }
-            else {
-                tableStatement += " " + subqueryTableItemContext.getChild(i).getText();
-            }
-        }
-
-        stepSqlComponent.setSqlStatement(tableStatement);
-        usedTables.add(tableInfo);
-        stepSqlComponent.setTables(usedTables);
-        return stepSqlComponent;
-    }
-
     public StepSqlComponent visitQueryExpression(MySqlParser.QueryExpressionContext query) {
         String Statement = "";
         StepSqlComponent stepSqlComponent = new StepSqlComponent();
@@ -1256,25 +1271,8 @@ public class SqlStepVisitor extends MySqlParserBaseVisitor {
     }
 
 
-    public TableInfo visitAtomTableItem(MySqlParser.AtomTableItemContext ctx) {
-        TableInfo tableInfo = new TableInfo();
-        int cnt = ctx.getChildCount();
 
-        // 테이블명
-        if(cnt == 1) {
-            tableInfo.setTableName(ctx.getChild(0).getText());
-        }
-        else if(cnt == 2) {
-            tableInfo.setTableName(ctx.getChild(0).getText());
-            tableInfo.setAlias(ctx.getChild(1).getText());
-        }
-        // 테이블명 AS alias
-        else {
-            tableInfo.setTableName(ctx.getChild(0).getText());
-            tableInfo.setAlias(ctx.getChild(2).getText());
-        }
-        return tableInfo;
-    }
+
     @Override public Object visitQuerySpecification(MySqlParser.QuerySpecificationContext ctx) {
 //        System.out.println("visitQuerySpecification");
         String sql = ctx.getText();
