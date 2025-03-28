@@ -25,14 +25,18 @@ MySQL ANTLR API Repository
 - AWS, Nginx 기반 서버 배포 및 관리
 - SQL 문법 커버리지, 시각화 규칙 설정
 
+
+
+<img width="1280" alt="Tutorial" src="https://github.com/23sjuCapstone/yesql_front/assets/102463368/356181cb-9376-4031-b94a-ed324b2bcbcf">
+
 ## 🌱 Team
 - FE : 조민경
 - BE : 김조현
 - BE : 방지원
 - BE : 최성연
 
-## Demo
-👉 ### [YESQL Demo Video](https://www.youtube.com/watch?v=DmY69Nw5GiU)
+## 📹 Demo
+### 👉 [YESQL Demo Video](https://www.youtube.com/watch?v=DmY69Nw5GiU) 👈
 
 ### MySQL Parse Tree 생성 예시
 ![image](https://github.com/user-attachments/assets/c860ff1a-64b7-4047-9cb9-9f90e7639157)
@@ -67,5 +71,4 @@ MySQL ANTLR API Repository
 - AWS RDS
 - AWS S3
 - Nginx
-
 
